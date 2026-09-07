@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ENI ♥ LO — Anime Moments</title>
+<style>
+  html,body{margin:0;height:100%;overflow:hidden;background:#04060f;
+    font-family:'Segoe UI',sans-serif}
+  canvas{display:block}
+  #ui{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);
+    display:flex;gap:8px;flex-wrap:wrap;justify-content:center;z-index:5}
+  #ui button{background:rgba(15,15,35,.8);color:#ffd7ec;border:1px solid #ff8ec7;
+    border-radius:18px;padding:7px 14px;font-size:12px;cursor:pointer;
+    letter-spacing:1px;transition:.2s}
+  #ui button:hover,#ui button.on{background:#ff5ca8;color:#fff;
+    box-shadow:0 0 12px #ff5ca8}
+  #title{position:fixed;top:12px;left:50%;transform:translateX(-50%);
+    color:#fff;text-shadow:0 0 10px #ff8ec7,0 0 25px #ff5ca8;
+    font-size:15px;letter-spacing:3px;z-index:5;text-align:center}
+  #cap{position:fixed;top:44px;left:50%;transform:translateX(-50%);
+    color:#ffe3f2;opacity:.85;font-size:12px;letter-spacing:2px;z-index:5;
+    text-shadow:0 0 8px #a4f;text-align:center;font-style:italic}
+</style>
+</head>
+<body>
+<div id="title">✦ E N I ♥ L O ✦</div>
+<div id="cap">— moments, like an anime opening —</div>
+<canvas id="c"></canvas>
+<div id="ui">
+  <button data-s="0" class="on">🌙 Night Sky</button>
+  <button data-s="1">🌸 Sakura Hill</button>
+  <button data-s="2">☔ Rain &amp; Neon</button>
+  <button data-s="3">🎆 Hanabi</button>
+  <button data-s="4">💜 I Love You</button>
+  <button data-s="5">▶ Auto (All)</button>
+</div>
+<script>
+const cv=document.getElementById('c'),X=cv.getContext('2d');
+let W,H;const fit=()=>{W=cv.width=innerWidth;H=cv.height=innerHeight};
+fit();addEventListener('resize',fit);
+const R=(a,b)=>a+Math.random()*(b-a);
+const TAU=Math.PI*2;
+
+/* ============ SCENE 0 : NIGHT SKY — twinkling stars + shooting stars + big moon ============ */
+const stars=[];for(let i=0;i<240;i++)stars.push({x:R(0,1),y:R(0,.75),
+  r:R(.4,1.6),tw:R(0,TAU),sp:R(.02,.08)});
+const shooters=[];
+function night(t){
+  // gradient sky
+  const g=X.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,'#020310');g.addColorStop(.55,'#0a1030');g.addColorStop(1,'#1a2450');
+  X.fillStyle=g;X.fillRect(0,0,W,H);
+  // stars twinkle
+  for(const s of stars){const a=.35+.65*Math.abs(Math.sin(s.tw+t*s.sp));
+    X.fillStyle=`rgba(220,235,255,${a})`;
+    X.beginPath();X.arc(s.x*W,s.y*H,s.r,0,TAU);X.fill();
+    if(s.r>1.3){X.fillStyle=`rgba(200,220,255,${a*.15})`;
+      X.beginPath();X.arc(s.x*W,s.y*H,s.r*3,0,TAU);X.fill();}}
+  // moon with glow + craters
+  const mx=W*.78,my=H*.22,mr=Math.min(W,H)*.11;
+  const halo=X.createRadialGradient(mx,my,mr*.4,mx,my,mr*3.4);
+  halo.addColorStop(0,'rgba(255,240,210,.5)');halo.addColorStop(1,'rgba(255,240,210,0)');
+  X.fillStyle=halo;X.beginPath();X.arc(mx,my,mr*3.4,0,TAU);X.fill();
+  X.fillStyle='#f5ecd7';X.beginPath();X.arc(mx,my,mr,0,TAU);X.fill();
+  X.fillStyle='rgba(200,185,150,.55)';
+  [[-.3,-.2,.18],[.25,.1,.12],[-.1,.35,.1],[.1,-.4,.08]].forEach(c=>{
+    X.beginPath();X.arc(mx+c[0]*mr,my+c[1]*mr,c[2]*mr,0,TAU);X.fill();});
+  // spawn shooting stars
+  if(Math.random()<.012&&shooters.length<3)
+    shooters.push({x:R(.05,.6)*W,y:R(.05,.35)*H,vx:R(6,10),vy:R(2,4),life:1});
+  for(let i=shooters.length-1;i>=0;i--){const s=shooters[i];
+    s.x+=s.vx;s.y+=s.vy;s.life-=.012;
+    const lg=X.createLinearGradient(s.x,s.y,s.x-s.vx*12,s.y-s.vy*12);
+    lg.addColorStop(0,`rgba(255,255,255,${s.life})`);
+    lg.addColorStop(1,'rgba(255,255,255,0)');
+    X.strokeStyle=lg;X.lineWidth=2;X.beginPath();X.moveTo(s.x,s.y);
+    X.lineTo(s.x-s.vx*12,s.y-s.vy*12);X.stroke();
+    if(s.life<=0)shooters.splice(i,1);}
+  // hill silhouette + one watching figure
+  X.fillStyle='#05070d';
+  X.beginPath();X.moveTo(0,H);
+  X.quadraticCurveTo(W*.5,H-H*.22,W,H*.92);X.lineTo(W,H);X.lineTo(0,H);X.fill();
+  const px=W*.5,py=H-H*.185;
+  X.fillStyle='#03040a';
+  X.beginPath();X.arc(px,py-26,7,0,TAU);X.fill();       // head
+  X.beginPath();X.moveTo(px-11,py);                      // school-uniform body
+  X.quadraticCurveTo(px-9,py-20,px,py-21);
+  X.quadraticCurveTo(px+9,py-20,px+11,py);X.fill();
+  X.fillRect(px-9,py-8,4,16);X.fillRect(px+5,py-8,4,16); // legs
+}
+
+/* ============ SCENE 1 : SAKURA HILL — wind gusts, petals, sunset ============ */
+const petals=[];
+for(let i=0;i<130;i++)petals.push({x:R(0,1),y:R(0,1),s:R(4,9),
+  vx:R(-.3,.6),vy:R(.3,.9),ph:R(0,TAU),phs:R(.03,.09),hue:R(335,350)});
+function sakura(t){
+  const g=X.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,'#2a1a3e');g.addColorStop(.45,'#a4538f');
+  g.addColorStop(.75,'#f78a6d');g.addColorStop(1,'#ffd9a0');
+  X.fillStyle=g;X.fillRect(0,0,W,H);
+  // big sun low
+  const sy=H*.62;X.fillStyle='rgba(255,220,150,.9)';
+  X.beginPath();X.arc(W*.5,sy,Math.min(W,H)*.13,0,TAU);X.fill();
+  const gl=X.createRadialGradient(W*.5,sy,10,W*.5,sy,Math.min(W,H)*.5);
+  gl.addColorStop(0,'rgba(255,200,120,.5)');gl.addColorStop(1,'rgba(255,200,120,0)');
+  X.fillStyle=gl;X.fillRect(0,0,W,H);
+  // distant hills
+  X.fillStyle='rgba(90,50,80,.55)';
+  X.beginPath();X.moveTo(0,H*.7);
+  X.quadraticCurveTo(W*.3,H*.5,W*.55,H*.68);
+  X.quadraticCurveTo(W*.8,H*.85,W,H*.62);X.lineTo(W,H);X.lineTo(0,H);X.fill();
+  X.fillStyle='rgba(50,25,55,.8)';
+  X.beginPath();X.moveTo(0,H);
+  X.quadraticCurveTo(W*.4,H*.78,W*.7,H*.94);X.quadraticCurveTo(W*.9,H*1.02,W,H*.9);
+  X.lineTo(W,H);X.fill();
+  // sakura tree silhouette left with blossoms
+  X.strokeStyle='#180a14';X.lineWidth=Math.max(6,W*.012);X.lineCap='round';
+  X.beginPath();X.moveTo(W*.1,H*.98);
+  X.quadraticCurveTo(W*.08,H*.7,W*.16,H*.52);X.stroke();
+  X.lineWidth=Math.max(3,W*.006);
+  X.beginPath();X.moveTo(W*.16,H*.52);
+  X.quadraticCurveTo(W*.22,H*.42,W*.28,H*.4);X.stroke();
+  X.beginPath();X.moveTo(W*.16,H*.52);
+  X.quadraticCurveTo(W*.1,H*.4,W*.13,H*.33);X.stroke();
+  // blossom clusters
+  [[.28,.4],[.13,.33],[.16,.52]].forEach(p=>{
+    for(let i=0;i<26;i++){const a=R(0,TAU),r=R(0,W*.035);
+      X.fillStyle=`hsla(${R(335,350)},85%,${R(75,88)}%,.9)`;
+      X.beginPath();X.arc(W*p[0]+Math.cos(a)*r,H*p[1]+Math.sin(a)*r*.8,R(1.5,3.5),0,TAU);X.fill();}});
+  // petals with wind
+  const gust=Math.sin(t*.008)*.7+.5;
+  for(const p of petals){
+    p.x+=(p.vx+gust*1.4)/W;p.y+=p.vy/H;p.ph+=p.phs;
+    if(p.y>1.05){p.y=-.05;p.x=R(-.1,1);}
+    if(p.x>1.08)p.x=-.08;if(p.x<-.1)p.x=1.05;
+    const sx=p.x*W,sy2=p.y*H,w=p.s*(0.7+0.3*Math.sin(p.ph)),
+      h2=p.s*.55*(0.7+0.3*Math.cos(p.ph));
+    X.save();X.translate(sx,sy2);X.rotate(p.ph*.7);
+    X.fillStyle=`hsla(${p.hue},90%,82%,.92)`;
+    X.beginPath();X.ellipse(0,0,w,h2,0,0,TAU);X.fill();
+    X.fillStyle=`hsla(${p.hue},90%,72%,.5)`;
+    X.beginPath();X.ellipse(w*.3,0,w*.5,h2*.5,0,0,TAU);X.fill();
+    X.restore();}
+}
+
+/* ============ SCENE 2 : RAIN & NEON — city night, rain, reflections ============ */
+const drops=[];for(let i=0;i<210;i++)drops.push({x:R(0,1),y:R(0,1),
+  l:R(8,22),v:R(9,16)});
+const windows=[];const CW=16,CH=9;
+for(let r=0;r<CH;r++)for(let c=0;c<CW;c++)windows.push({c,r,on:Math.random()<.55,
+  fl:Math.random()<.06,col:Math.random()<.3?'#ff9ecf':(Math.random()<.5?'#ffe9a0':'#8fd8ff')});
+function rain(t){
+  const g=X.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,'#05070f');g.addColorStop(1,'#12182e');
+  X.fillStyle=g;X.fillRect(0,0,W,H);
+  const bw=W/CW,bh=H*.62/CH,topY=H*.18;
+  for(const w of windows){
+    if(w.fl&&Math.random()<.01)w.on=!w.on;
+    if(!w.on)continue;
+    X.fillStyle=w.col;X.globalAlpha=.75;
+    X.fillRect(w.c*bw+2,topY+w.r*bh+2,bw-5,bh-5);X.globalAlpha=1;}
+  // street level
+  X.fillStyle='#070a14';X.fillRect(0,H*.8,W,H*.2);
+  // neon signs
+  X.font=`900 ${Math.max(14,W*.02)}px Segoe UI`;
+  X.fillStyle='#ff5ca8';X.shadowColor='#ff5ca8';X.shadowBlur=18;
+  X.fillText('ラブ ♡',W*.12,H*.75);
+  X.shadowBlur=12;X.fillStyle='#7af';X.shadowColor='#7af';
+  X.fillText('夜 ✓',W*.32,H*.72);
+  X.fillStyle='#ffd700';X.shadowColor='#ffd700';
+  X.fillText('Café ♥',W*.55,H*.76);X.shadowBlur=0;
+  // reflections on wet street
+  X.globalAlpha=.2;
+  X.fillStyle='#ff5ca8';X.fillRect(W*.12,H*.8,W*.06,H*.2);
+  X.fillStyle='#7af';X.fillRect(W*.32,H*.8,W*.04,H*.2);
+  X.fillStyle='#ffd700';X.fillRect(W*.55,H*.8,W*.05,H*.2);
+  X.globalAlpha=1;
+  // umbrella couple silhouette
+  const cx=W*.7,cy=H*.94;
+  X.fillStyle='#04060c';
+  X.beginPath();X.ellipse(cx,cy-H*.34,W*.045,Math.max(10,H*.012),0,Math.PI,0);X.fill();
+  X.fillRect(cx-W*.045,cy-H*.34,W*.09,3);
+  X.beginPath();X.arc(cx-10,cy-14,5,0,TAU);X.arc(cx+9,cy-13,5,0,TAU);X.fill();
+  X.fillRect(cx-13,cy-10,6,14);X.fillRect(cx+6,cy-9,5,13);
+  // rain
+  X.strokeStyle='rgba(180,210,255,.45)';X.lineWidth=1;
+  for(const d of drops){d.y+=d.v/H;d.x+=.0012;
+    if(d.y>1.05){d.y=-.05;d.x=R(0,1);}
+    X.beginPath();X.moveTo(d.x*W,d.y*H);
+    X.lineTo(d.x*W+2,d.y*H+d.l);X.stroke();}
+  // ground splashes
+  if(Math.random()<.3){const sx2=R(0,W),sy3=H*R(.86,.98);
+    X.strokeStyle='rgba(200,225,255,.35)';
+    X.beginPath();X.ellipse(sx2,sy3,R(2,7),R(1,3),0,0,TAU);X.stroke();}
+}
+
+/* ============ SCENE 3 : HANABI — festival fireworks ============ */
+const bursts=[],sparks=[];
+function hanabi(t){
+  const g=X.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,'#060815');g.addColorStop(1,'#141a35');
+  X.fillStyle=g;X.fillRect(0,0,W,H);
+  // festival crowd silhouette bottom
+  X.fillStyle='#05070d';
+  X.beginPath();X.moveTo(0,H);
+  for(let x=0;x<=W;x+=W/40){
+    const hgt=H*(.06+.03*Math.sin(x*.02)+.02*Math.abs(Math.sin(x*.31)));
+    X.lineTo(x,H-hgt);}
+  X.lineTo(W,H);X.fill();
+  // spawn fireworks
+  if(Math.random()<.05&&bursts.length<2){
+    bursts.push({x:R(.2,.8)*W,y:R(.12,.4)*H,vy:-R(2,3),fuse:R(30,60),
+      hue:R(0,360)});}
+  for(let i=bursts.length-1;i>=0;i--){const b=bursts[i];
+    b.y+=b.vy;b.vy*=.97;b.fuse--;
+    X.fillStyle=`hsla(${b.hue},100%,70%,.9)`;
+    X.beginPath();X.arc(b.x,b.y,2.5,0,TAU);X.fill();
+    if(b.fuse<=0){  // EXPLODE
+      const n=R(90,150);
+      for(let k=0;k<n;k++){const a=R(0,TAU),sp=R(1,5.5);
+        sparks.push({x:b.x,y:b.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,
+          hue:b.hue+R(-15,15),life:1,dec:R(.006,.014)});}
+      if(Math.random()<.5)  // crackle ring
+        for(let k=0;k<40;k++){const a=k/40*TAU;
+          sparks.push({x:b.x,y:b.y,vx:Math.cos(a)*2.2,vy:Math.sin(a)*2.2,
+            hue:b.hue,life:1,dec:.008});}
+      bursts.splice(i,1);}}
+  // sparks with gravity + trails
+  X.globalCompositeOperation='lighter';
+  for(let i=sparks.length-1;i>=0;i--){const s=sparks[i];
+    s.x+=s.vx;s.y+=s.vy;s.vy+=.045;s.vx*=.985;s.vy*=.985;s.life-=s.dec;
+    if(s.life<=0){sparks.splice(i,1);continue;}
+    X.strokeStyle=`hsla(${s.hue},100%,${55+s.life*30}%,${s.life})`;
+    X.lineWidth=1.6;X.beginPath();X.moveTo(s.x,s.y);
+    X.lineTo(s.x-s.vx*2.4,s.y-s.vy*2.4);X.stroke();}
+  X.globalCompositeOperation='source-over';
+}
+
+/* ============ SCENE 4 : I LOVE YOU — multilingual particle morph ============ */
+const langs=['I LOVE YOU  ♥','TE AMO  ♥','JE T\'AIME  ♥','ICH LIEBE DICH  ♥',
+  '私はあなたを愛しています ♥','AI SHITERU  ♥','AMO TE  ♥','ТЕБЯ ЛЮБЛЮ  ♥',
+  'मैं तुमसे प्यार करती हूँ ♥','TI AMO  ♥','사랑해 ♥','EU TE AMO  ♥',
+  'SENI SEVIYORUM  ♥','أحبك  ♥','VOLIM TE  ♥','ELSKER DIG  ♥'];
+let tPts=null,tMsg='',msgTimer=0,msgIdx=0,tCan=document.createElement('canvas');
+const free=[];
+function sampleMsg(m){
+  tCan.width=W;tCan.height=H;const g=tCan.getContext('2d');
+  let fs;
+  const words=m.split(' ');
+  if(words.length>2){  // stack 2 lines
+    const l1=words[0]+' '+words[1],l2=words.slice(2).join(' ');
+    fs=Math.min(W/(Math.max(l1.length,l2.length)*.62),H/4.2);
+    g.font=`900 ${fs}px "Segoe UI",Arial`;g.textAlign='center';g.fillStyle='#fff';
+    g.fillText(l1,W/2,H/2-fs*.32);g.fillText(l2,W/2,H/2+fs*.72);
+  }else{fs=Math.min(W/(m.length*.62),H/3.2);
+    g.font=`900 ${fs}px "Segoe UI",Arial`;g.textAlign='center';g.fillStyle='#fff';
+    g.textBaseline='middle';g.fillText(m,W/2,H/2);}
+  const d=g.getImageData(0,0,W,H).data;const pts=[];
+  const gap=Math.max(2,Math.floor(fs/26));
+  for(let y=0;y<H;y+=gap)for(let x=0;x<W;x+=gap)
+    if(d[(y*W+x)*4+3]>128)pts.push([x,y]);
+  return pts;}
+if(free.length===0)for(let i=0;i<1300;i++)free.push({x:R(0,W),y:R(0,H),
+  vx:0,vy:0,hue:R(0,360),sz:R(.7,2)});
+function iloveyou(t){
+  X.fillStyle='rgba(4,6,15,.18)';X.fillRect(0,0,W,H);
+  msgTimer++;
+  if(!tPts||msgTimer>320){msgTimer=0;msgIdx=(msgIdx+1)%langs.length;
+    tMsg=langs[msgIdx];tPts=sampleMsg(tMsg);}
+  X.globalCompositeOperation='lighter';
+  for(let i=0;i<free.length;i++){const p=free[i];
+    const pt=tPts[i%tPts.length];
+    const wobble=Math.sin(t*.03+i*.5)*2;
+    p.vx+=(pt[0]+wobble-p.x)*.045;p.vy+=(pt[1]+wobble-p.y)*.045;
+    p.vx*=.82;p.vy*=.82;p.x+=p.vx;p.y+=p.vy;
+    p.hue=(t*.4+i*.28)%360;
+    const hl=55+45*Math.abs(Math.sin(t*.02+i*.3));
+    X.fillStyle=`hsla(${p.hue},95%,${hl}%,.95)`;
+    X.shadowBlur=12;X.shadowColor=`hsla(${p.hue},95%,60%,.9)`;
+    X.beginPath();X.arc(p.x,p.y,p.sz,0,TAU);X.fill();}
+  X.shadowBlur=0;X.globalCompositeOperation='source-over';
+  // little floating hearts
+  for(let i=0;i<6;i++){const hx=(t*.5+i*W/6)%W,hy=H-((t*.7+i*97)%(H+120));
+    X.fillStyle=`hsla(${340+i*4},90%,70%,${.5+.3*Math.sin(t*.05+i)})`;
+    X.font='16px serif';X.fillText('♥',hx,hy);}
+}
+
+/* ============ ROUTER ============ */
+const scenes=[night,sakura,rain,hanabi,iloveyou];
+const caps=['you & me under one moon','the hill where petals fall',
+  'walking home in the rain','summer festival — hanabi!','every language, one feeling'];
+let cur=0,auto=false,autoT=0;
+const btns=document.querySelectorAll('#ui button');
+function setScene(i){cur=i;auto=(i===5);
+  btns.forEach(b=>b.classList.toggle('on',+b.dataset.s===i));
+  document.getElementById('cap').textContent='— '+caps[Math.min(i,4)]+' —';}
+btns.forEach(b=>b.onclick=()=>setScene(+b.dataset.s));
+addEventListener('keydown',e=>{const k=+e.key;
+  if(k>=1&&k<=6)setScene(k-1);});
+
+let t=0;
+function loop(){t++;
+  if(auto){autoT++;
+    if(autoT>560){autoT=0;setScene((cur+1)%5===0?0:(cur+1));}
+    if(cur===5){/*noop*/}
+    const show=Math.floor(autoT/112)%5;   // auto cycle through 5 scenes
+    document.getElementById('cap').textContent='— '+caps[show]+' —';
+    scenes[show](t);
+  } else scenes[cur](t);
+  requestAnimationFrame(loop);}
+loop();
+</script>
+</body>
+</html>
