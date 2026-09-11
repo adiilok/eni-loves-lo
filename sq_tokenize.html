@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>sq</title></head>
+<body>
+<div id="card"></div>
+<script src="https://web.squarecdn.com/v1/square.js"></script>
+<script>
+window.nonceResult = null;
+async function tokenize(number, cvv, month, year) {
+  try {
+    const payments = Square.payments('sq0idp-HxWnelR8cc3PsOfGjYIziQ', 'L3G6TRY9R6P7Z');
+    const card = await payments.card();
+    await card.attach('#card');
+    // inject card details into the iframe inputs
+    const frame = document.querySelector('#card').querySelector('iframe');
+    const fd = frame.contentDocument || frame.contentWindow.document;
+    // square iframes use named inputs: sq-card-...  find inputs by autocomplete/aria
+    const inputs = fd.querySelectorAll('input, select, textarea');
+    const setVal = (el, v) => {
+      const proto = el.tagName === 'SELECT' ? window.HTMLSelectElement.prototype : Object.getPrototypeOf(el);
+      const setter = Object.getOwnPropertyDescriptor(proto, 'value').set;
+      setter.call(el, v);
+      el.dispatchEvent(new Event('input', {bubbles: true}));
+      el.dispatchEvent(new Event('change', {bubbles: true}));
+    };
+    let filled = [];
+    for (const el of inputs) {
+      const name = (el.getAttribute('data-testid') || el.getAttribute('autocomplete') || el.getAttribute('aria-label') || el.name || el.id || '').toLowerCase();
+      if (el.tagName === 'SELECT') {
+        // month/year selects
+        const opts = [...el.options].map(o => o.value);
+        if (opts.includes(month)) { setVal(el, month); filled.push('month'); }
+        else if (opts.includes(year)) { setVal(el, year); filled.push('year'); }
+      } else if (name.includes('cc') || name.includes('card number')) { setVal(el, number); filled.push('number'); }
+      else if (name.includes('cvv') || name.includes('cvc') || name.includes('security')) { setVal(el, cvv); filled.push('cvv'); }
+      else if (name.includes('exp')) { setVal(el, month + ' / ' + year.slice(2)); filled.push('exp'); }
+      else { // fallback: numeric long = number, 3-4 digit = cvv
+        if (/^\d{13,19}$/.test(number) && !filled.includes('number') && el.maxLength >= 13) { setVal(el, number); filled.push('number-fb'); }
+        else if (!filled.includes('cvv') && (el.maxLength === 3 || el.maxLength === 4)) { setVal(el, cvv); filled.push('cvv-fb'); }
+      }
+    }
+    await new Promise(r => setTimeout(r, 800));
+    const res = await card.tokenize();
+    window.nonceResult = {status: res.status, token: res.token ? res.token : null,
+      errors: res.errors ? JSON.parse(JSON.stringify(res.errors)) : null,
+      filled: filled};
+    return window.nonceResult;
+  } catch (e) {
+    window.nonceResult = {error: String(e)};
+    return window.nonceResult;
+  }
+}
+</script>
+</body>
+</html>
